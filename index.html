@@ -322,6 +322,21 @@
   .footer-ornament { display: flex; gap: 4px; align-items: center; }
   .footer-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--primary-glow); }
 
+  /* ─── MULTI-STEP FLOW ─── */
+  .step-container {
+    display: none;
+    opacity: 0;
+    transform: translateX(20px);
+    transition: opacity 300ms var(--ease-out), transform 300ms var(--ease-out);
+  }
+  .step-container.active {
+    display: block;
+  }
+  .step-container.visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
   /* ─── FORM ELEMENTS ─── */
   .form-section { margin-bottom: 20px; }
   .form-label {
@@ -422,8 +437,8 @@
   }
   .form-hint .hint-req { color: var(--primary-glow); font-weight: 700; }
 
-  /* ─── SUBMIT BTN ─── */
-  .submit-btn {
+  /* ─── SUBMIT/CONTINUE BTN ─── */
+  .submit-btn, .continue-btn {
     width: 100%; padding: 16px;
     background: linear-gradient(105deg, #245746 0%, #2F6F57 30%, #5CA882 52%, #2F6F57 72%, #245746 100%);
     background-size: 250% 100%; background-position: 100% 0;
@@ -435,10 +450,10 @@
     box-shadow: 0 4px 20px rgba(47,111,87,0.44); -webkit-tap-highlight-color: transparent;
     position: relative; overflow: hidden;
   }
-  .submit-btn::before { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(237,250,244,0.20) 0%, rgba(200,237,217,0.07) 38%, transparent 68%); opacity: 0.75; transition: opacity 300ms var(--ease-out); pointer-events: none; }
-  .submit-btn::after { content: ''; position: absolute; top: 0; left: -90%; width: 55%; height: 100%; background: linear-gradient(102deg, transparent 0%, rgba(237,250,244,0.10) 30%, rgba(237,250,244,0.22) 50%, rgba(237,250,244,0.10) 70%, transparent 100%); transform: skewX(-10deg); animation: gold-shimmer 7s cubic-bezier(0.4,0,0.6,1) infinite; animation-delay: 1.5s; opacity: 0.65; transition: opacity 400ms var(--ease-out); pointer-events: none; }
-  .submit-btn:active { transform: scale(0.982); }
-  .submit-btn:hover { border-color: rgba(237,250,244,0.54); box-shadow: 0 4px 24px rgba(92,168,130,0.55); background-position: 0% 0; }
+  .submit-btn::before, .continue-btn::before { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(237,250,244,0.20) 0%, rgba(200,237,217,0.07) 38%, transparent 68%); opacity: 0.75; transition: opacity 300ms var(--ease-out); pointer-events: none; }
+  .submit-btn::after, .continue-btn::after { content: ''; position: absolute; top: 0; left: -90%; width: 55%; height: 100%; background: linear-gradient(102deg, transparent 0%, rgba(237,250,244,0.10) 30%, rgba(237,250,244,0.22) 50%, rgba(237,250,244,0.10) 70%, transparent 100%); transform: skewX(-10deg); animation: gold-shimmer 7s cubic-bezier(0.4,0,0.6,1) infinite; animation-delay: 1.5s; opacity: 0.65; transition: opacity 400ms var(--ease-out); pointer-events: none; }
+  .submit-btn:active, .continue-btn:active { transform: scale(0.982); }
+  .submit-btn:hover, .continue-btn:hover { border-color: rgba(237,250,244,0.54); box-shadow: 0 4px 24px rgba(92,168,130,0.55); background-position: 0% 0; }
 
   @keyframes gold-shimmer { 0%,22% { left: -90%; } 72%,100% { left: 180%; } }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
@@ -672,7 +687,7 @@
 <div id="bookingScreen" aria-modal="true" role="dialog" aria-label="Agendamento">
 
   <div class="booking-topbar">
-    <button class="back-btn" onclick="closeBooking()" aria-label="Voltar para a página inicial">
+    <button class="back-btn" onclick="handleBackButton()" aria-label="Voltar">
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
         <path d="M11 3L5 9L11 15" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
@@ -683,101 +698,128 @@
 
   <div class="booking-body">
 
-    <div class="booking-header">
-      <div class="booking-title">Agendar<br><strong>Horário</strong></div>
-      <div class="booking-for" id="bookingFor">com Letícia</div>
-    </div>
-
-    <!-- Nome -->
-    <div class="form-section">
-      <label class="form-label" for="clientName">Seu nome</label>
-      <input class="form-input" id="clientName" type="text" placeholder="Como prefere ser chamada?" autocomplete="given-name">
-    </div>
-
-    <!-- Serviços -->
-    <div class="form-section">
-      <label class="form-label">Serviço desejado</label>
-      <div class="service-chips-form" id="serviceChips">
-        <button class="service-chip-form" onclick="toggleChip(this)" type="button">
-          <span class="chip-label">Unhas em Gel</span><span class="chip-remove">✕</span>
-        </button>
-        <button class="service-chip-form" onclick="toggleChip(this)" type="button">
-          <span class="chip-label">Fibra de Vidro</span><span class="chip-remove">✕</span>
-        </button>
-        <button class="service-chip-form" onclick="toggleChip(this)" type="button">
-          <span class="chip-label">Manutenção</span><span class="chip-remove">✕</span>
-        </button>
-        <button class="service-chip-form" onclick="toggleChip(this)" type="button">
-          <span class="chip-label">Nail Art</span><span class="chip-remove">✕</span>
-        </button>
-        <button class="service-chip-form" onclick="toggleChip(this)" type="button">
-          <span class="chip-label">Esmaltação</span><span class="chip-remove">✕</span>
-        </button>
-        <button class="service-chip-form" onclick="toggleChip(this)" type="button">
-          <span class="chip-label">Remoção</span><span class="chip-remove">✕</span>
-        </button>
-        <button class="service-chip-form" onclick="toggleChip(this)" type="button">
-          <span class="chip-label">Cutículas</span><span class="chip-remove">✕</span>
-        </button>
+    <!-- STEP 1: Nome -->
+    <div class="step-container" id="step1">
+      <div class="booking-header">
+        <div class="booking-title">Um prazer<br><strong>te ver aqui!</strong></div>
+        <div class="booking-for" id="bookingFor">com Letícia</div>
       </div>
-    </div>
 
-    <!-- Datas e horários -->
-    <div class="form-section">
-      <label class="form-label">Datas e horários de preferência</label>
-      <p class="form-hint">
-        Informe até 3 opções — apenas a 1ª é <span class="hint-req">obrigatória</span>.<br>
-        Toque para escolher data e horário.
-      </p>
-      <div class="time-opt-rows">
-
-        <div class="time-opt-row">
-          <span class="time-opt-label">1ª opção <span class="req">*</span></span>
-          <div class="datetime-row">
-            <input class="form-input date-input" id="date1" readonly placeholder="Clique para escolher a data"
-                   onclick="openDatePicker(1)" aria-label="Data da 1ª opção">
-            <input class="form-input time-input" id="time1" readonly placeholder="Clique para escolher o horário"
-                   onclick="openTimePicker(1)" aria-label="Horário da 1ª opção">
-          </div>
-        </div>
-
-        <div class="time-opt-row">
-          <span class="time-opt-label">2ª opção <span class="opt-tag">(opcional)</span></span>
-          <div class="datetime-row">
-            <input class="form-input date-input" id="date2" readonly placeholder="Clique para escolher a data"
-                   onclick="openDatePicker(2)" aria-label="Data da 2ª opção">
-            <input class="form-input time-input" id="time2" readonly placeholder="Clique para escolher o horário"
-                   onclick="openTimePicker(2)" aria-label="Horário da 2ª opção">
-          </div>
-        </div>
-
-        <div class="time-opt-row">
-          <span class="time-opt-label">3ª opção <span class="opt-tag">(opcional)</span></span>
-          <div class="datetime-row">
-            <input class="form-input date-input" id="date3" readonly placeholder="Clique para escolher a data"
-                   onclick="openDatePicker(3)" aria-label="Data da 3ª opção">
-            <input class="form-input time-input" id="time3" readonly placeholder="Clique para escolher o horário"
-                   onclick="openTimePicker(3)" aria-label="Horário da 3ª opção">
-          </div>
-        </div>
-
+      <div class="form-section">
+        <label class="form-label" for="clientName">Qual seu nome?</label>
+        <input class="form-input" id="clientName" type="text" placeholder="Como posso te chamar?" autocomplete="given-name">
+        <div class="time-error" id="nameError" role="alert"></div>
       </div>
-      <div class="time-error" id="timeError" role="alert"></div>
+
+      <button class="continue-btn" onclick="goToStep(2)">
+        Continuar
+      </button>
     </div>
 
-    <!-- Observações -->
-    <div class="form-section">
-      <label class="form-label" for="notes">Observações</label>
-      <textarea class="form-textarea" id="notes"
-        placeholder="Preferências, referência de nail art, informações importantes..."></textarea>
+    <!-- STEP 2: Serviço -->
+    <div class="step-container" id="step2">
+      <div class="booking-header">
+        <div class="booking-title">Selecione o<br><strong>serviço desejado</strong></div>
+        <div class="booking-for" id="bookingFor2">com Letícia</div>
+      </div>
+
+      <div class="form-section">
+        <div class="service-chips-form" id="serviceChips">
+          <button class="service-chip-form" onclick="toggleChip(this)" type="button">
+            <span class="chip-label">Unhas em Gel</span><span class="chip-remove">✕</span>
+          </button>
+          <button class="service-chip-form" onclick="toggleChip(this)" type="button">
+            <span class="chip-label">Fibra de Vidro</span><span class="chip-remove">✕</span>
+          </button>
+          <button class="service-chip-form" onclick="toggleChip(this)" type="button">
+            <span class="chip-label">Manutenção</span><span class="chip-remove">✕</span>
+          </button>
+          <button class="service-chip-form" onclick="toggleChip(this)" type="button">
+            <span class="chip-label">Nail Art</span><span class="chip-remove">✕</span>
+          </button>
+          <button class="service-chip-form" onclick="toggleChip(this)" type="button">
+            <span class="chip-label">Esmaltação</span><span class="chip-remove">✕</span>
+          </button>
+          <button class="service-chip-form" onclick="toggleChip(this)" type="button">
+            <span class="chip-label">Remoção</span><span class="chip-remove">✕</span>
+          </button>
+          <button class="service-chip-form" onclick="toggleChip(this)" type="button">
+            <span class="chip-label">Cutículas</span><span class="chip-remove">✕</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <label class="form-label" for="serviceDetails">Detalhes do atendimento <span style="color: rgba(200,237,217,0.60); font-weight: 500;">(opcional)</span></label>
+        <textarea class="form-textarea" id="serviceDetails" placeholder="Informações adicionais sobre o serviço..."></textarea>
+      </div>
+
+      <button class="continue-btn" onclick="goToStep(3)">
+        Continuar
+      </button>
     </div>
 
-    <button class="submit-btn" onclick="sendWhatsApp()">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z" fill="#FFFFFF"/>
-      </svg>
-      Enviar pelo WhatsApp
-    </button>
+    <!-- STEP 3: Data, horário e observações -->
+    <div class="step-container" id="step3">
+      <div class="booking-header">
+        <div class="booking-title">Selecione até 3<br><strong>datas e horários</strong></div>
+        <div class="booking-for" id="bookingFor3">com Letícia</div>
+      </div>
+
+      <div class="form-section">
+        <p class="form-hint">
+          Informe até 3 opções de preferência para facilitar seu atendimento.<br>
+          Apenas a 1ª é <span class="hint-req">obrigatória</span>.
+        </p>
+        <div class="time-opt-rows">
+
+          <div class="time-opt-row">
+            <span class="time-opt-label">1ª opção <span class="req">*</span></span>
+            <div class="datetime-row">
+              <input class="form-input date-input" id="date1" readonly placeholder="Clique para escolher a data"
+                     onclick="openDatePicker(1)" aria-label="Data da 1ª opção">
+              <input class="form-input time-input" id="time1" readonly placeholder="Clique para escolher o horário"
+                     onclick="openTimePicker(1)" aria-label="Horário da 1ª opção">
+            </div>
+          </div>
+
+          <div class="time-opt-row">
+            <span class="time-opt-label">2ª opção <span class="opt-tag">(opcional)</span></span>
+            <div class="datetime-row">
+              <input class="form-input date-input" id="date2" readonly placeholder="Clique para escolher a data"
+                     onclick="openDatePicker(2)" aria-label="Data da 2ª opção">
+              <input class="form-input time-input" id="time2" readonly placeholder="Clique para escolher o horário"
+                     onclick="openTimePicker(2)" aria-label="Horário da 2ª opção">
+            </div>
+          </div>
+
+          <div class="time-opt-row">
+            <span class="time-opt-label">3ª opção <span class="opt-tag">(opcional)</span></span>
+            <div class="datetime-row">
+              <input class="form-input date-input" id="date3" readonly placeholder="Clique para escolher a data"
+                     onclick="openDatePicker(3)" aria-label="Data da 3ª opção">
+              <input class="form-input time-input" id="time3" readonly placeholder="Clique para escolher o horário"
+                     onclick="openTimePicker(3)" aria-label="Horário da 3ª opção">
+            </div>
+          </div>
+
+        </div>
+        <div class="time-error" id="timeError" role="alert"></div>
+      </div>
+
+      <div class="form-section">
+        <label class="form-label" for="notes">Observações <span style="color: rgba(200,237,217,0.60); font-weight: 500;">(opcional)</span></label>
+        <textarea class="form-textarea" id="notes"
+          placeholder="Preferências, referência de nail art, informações importantes..."></textarea>
+      </div>
+
+      <button class="submit-btn" onclick="sendWhatsApp()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z" fill="#FFFFFF"/>
+        </svg>
+        Finalizar no WhatsApp
+      </button>
+    </div>
 
   </div>
 </div>
@@ -822,20 +864,32 @@
 const WHATSAPP = '5583991816152';
 const proNames = { leticia: 'Letícia', maria: 'Maria' };
 let currentPro = 'leticia';
+let currentStep = 1;
 
 /* ───── BOOKING SCREEN ───── */
 function openBooking(pro) {
   currentPro = pro;
+  currentStep = 1;
+  
+  // Update all booking-for elements
   document.getElementById('bookingFor').textContent = 'com ' + proNames[pro];
-  // reset form
+  document.getElementById('bookingFor2').textContent = 'com ' + proNames[pro];
+  document.getElementById('bookingFor3').textContent = 'com ' + proNames[pro];
+  
+  // Reset form
   document.getElementById('clientName').value = '';
+  document.getElementById('serviceDetails').value = '';
   document.getElementById('notes').value = '';
   document.querySelectorAll('.service-chip-form').forEach(c => c.classList.remove('selected'));
   ['date1','time1','date2','time2','date3','time3'].forEach(id => {
     const el = document.getElementById(id);
     if (el) { el.value = ''; el.classList.remove('field-error'); }
   });
+  document.getElementById('nameError').textContent = '';
   document.getElementById('timeError').textContent = '';
+
+  // Show step 1
+  showStep(1);
 
   const home = document.getElementById('homeScreen');
   const booking = document.getElementById('bookingScreen');
@@ -859,6 +913,61 @@ function closeBooking() {
   home.classList.remove('exiting');
   document.body.style.overflow = '';
   setTimeout(() => { booking.style.display = ''; }, 420);
+}
+
+function handleBackButton() {
+  if (currentStep > 1) {
+    goToStep(currentStep - 1);
+  } else {
+    closeBooking();
+  }
+}
+
+/* ───── STEP NAVIGATION ───── */
+function showStep(stepNum) {
+  // Hide all steps
+  document.querySelectorAll('.step-container').forEach(step => {
+    step.classList.remove('active', 'visible');
+  });
+
+  // Show target step with animation
+  const targetStep = document.getElementById('step' + stepNum);
+  targetStep.classList.add('active');
+  
+  // Scroll to top smoothly
+  const bookingBody = document.querySelector('.booking-body');
+  if (bookingBody) {
+    bookingBody.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      targetStep.classList.add('visible');
+    });
+  });
+  
+  currentStep = stepNum;
+}
+
+function goToStep(stepNum) {
+  // Validate before proceeding
+  if (stepNum === 2 && currentStep === 1) {
+    // Validate name
+    const name = document.getElementById('clientName').value.trim();
+    const nameError = document.getElementById('nameError');
+    
+    if (!name) {
+      document.getElementById('clientName').classList.add('field-error');
+      nameError.textContent = 'Por favor, informe seu nome para continuar.';
+      document.getElementById('clientName').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    
+    document.getElementById('clientName').classList.remove('field-error');
+    nameError.textContent = '';
+  }
+  
+  showStep(stepNum);
 }
 
 /* ───── SERVICE CHIPS ───── */
@@ -1053,15 +1162,17 @@ function sendWhatsApp() {
   const times = validateTimes();
   if (!times) return;
 
-  const name      = document.getElementById('clientName').value.trim();
-  const chipsSel  = [...document.querySelectorAll('.service-chip-form.selected .chip-label')].map(c => c.textContent.trim()).join(', ');
-  const service   = chipsSel || '';
-  const notes     = document.getElementById('notes').value.trim();
-  const proName   = proNames[currentPro];
+  const name         = document.getElementById('clientName').value.trim();
+  const chipsSel     = [...document.querySelectorAll('.service-chip-form.selected .chip-label')].map(c => c.textContent.trim()).join(', ');
+  const service      = chipsSel || '';
+  const serviceDetails = document.getElementById('serviceDetails').value.trim();
+  const notes        = document.getElementById('notes').value.trim();
+  const proName      = proNames[currentPro];
 
   let msg = `Olá, ${proName}! 🌸\n\nGostaria de agendar um horário.`;
   if (name)    msg += `\n\n*Nome:* ${name}`;
   if (service) msg += `\n*Serviço:* ${service}`;
+  if (serviceDetails) msg += `\n*Detalhes:* ${serviceDetails}`;
   msg += `\n\n*Opções de horário:*\n  1ª: ${times.v1}`;
   if (times.v2) msg += `\n  2ª: ${times.v2}`;
   if (times.v3) msg += `\n  3ª: ${times.v3}`;
@@ -1079,7 +1190,11 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     closeModal('datePickerModal');
     closeModal('timePickerModal');
-    closeBooking();
+    if (currentStep > 1) {
+      goToStep(currentStep - 1);
+    } else {
+      closeBooking();
+    }
   }
 });
 </script>
